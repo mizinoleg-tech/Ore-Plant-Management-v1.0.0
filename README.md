@@ -24,7 +24,7 @@
 - `SaveLoad/` — сохранение и загрузка прогресса
 ## 📸 Скриншоты
 ![Panel1](panel1.png)
-![Panel1](lebl.png)
+![Panel1](lebl.jpg)
 
 
 ## 📦 Установка
