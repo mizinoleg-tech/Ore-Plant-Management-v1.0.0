@@ -23,8 +23,7 @@
 - `Analytics/` — отчёты и визуализация
 - `SaveLoad/` — сохранение и загрузка прогресса
 ## 📸 Скриншоты
-
-![Panel1](screenshots/panel1.png)
+![Panel1](panel1.png)
 
 ## 📦 Установка
 ```bash
