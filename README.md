@@ -26,7 +26,8 @@
 ![Panel1](panel1.png)
 ![Panel1](lebl.jpg)
 ![Panel1](analitics.png)
-
+![Panel1](TaxPay.png)
+![Panel1](Report.png)
 ## 📦 Установка
 ```bash
 git clone https://github.com/USERNAME/Complex.git
