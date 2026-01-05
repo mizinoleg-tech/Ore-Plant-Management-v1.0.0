@@ -25,7 +25,7 @@
 ## 📸 Скриншоты
 ![Panel1](panel1.png)
 ![Panel1](lebl.jpg)
-
+![Panel1](analitics.png)
 
 ## 📦 Установка
 ```bash
