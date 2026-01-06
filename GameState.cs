@@ -14,8 +14,9 @@ namespace Miner
         public List<Workers> Workers { get; set; }
         public List<Equipment> Equipments { get; set; }
         public WarehouseItem RawOre { get; set; }
-
+       
         public double Balance { get; private set; } = 500000;
+        public int MineLevel { get; set; }
         public double TotalIncome { get; private set; }
         public double TotalExpenses { get; private set; }
         public double LastDayExpenses { get; private set; }
@@ -33,8 +34,9 @@ namespace Miner
         {
             Deposits = new List<MineDeposit>
             {
-                new MineDeposit(900, 1450000_000, 175_000_000), // 1 450 000 млн т (в тоннах)
-                new MineDeposit(1250, 1670000_000, 250_000_000), // 250 млн грн
+                new MineDeposit(900, 450000_000, 175_000_000), // 1 450 000 млн т (в тоннах)
+                new MineDeposit(1250, 670000_000, 250_000_000), // 250 млн грн
+                new MineDeposit(1315, 750000_000, 295_000_000),
                 // можешь добавить дальше уровни...
             };
 
@@ -51,7 +53,7 @@ namespace Miner
                 new Equipment("Скреперные лебедки", 5.3, 450, 175000)
             };
 
-            RawOre = new WarehouseItem("Сырая руда", 0, 3500); // тут должна быть только цена 
+            RawOre = new WarehouseItem("Сырая руда", 0, 3400); // тут должна быть только цена 
         }
 
 
@@ -111,6 +113,9 @@ namespace Miner
         // 👉 Нормы на 1 тонну руды
         public double WaterPerTon { get; set; } = 100;   // литров
         public double EnergyPerTon { get; set; } = 100;  // кВт·ч
+        public object Employees { get; internal set; }
+        public IEnumerable<object> Equipment { get; internal set; }
+
         public event Action DayChanged;
 
 
@@ -171,17 +176,28 @@ namespace Miner
         }
         public void AddMonthlyReport(DateTime date)
         {
+            // считаем налог (25% от прибыли месяца)
+            double tax = Math.Round(CurrentMonthProfit * 0.25);
+
             Reports.Add(new DayReport
             {
                 Date = date,
-                Production = RawOre.Quantity,       // сколько накоплено за месяц
-                Sold = 0,                           // можно добавить продажи
+                Production = RawOre.Quantity,       // сколько добыто за месяц
+                Sold = 0,                           // можно добавить продажи, если фиксируешь отдельно
                 Income = TotalIncome,               // доход за месяц
                 Expenses = TotalExpenses,           // расходы за месяц
-                Profit = TotalIncome - TotalExpenses,
-                Balance = Balance
+                Profit = TotalIncome - TotalExpenses, // прибыль до налога
+                Balance = Balance,                  // текущий баланс
+                MonthProfit = CurrentMonthProfit,   // накопленная прибыль месяца
+                TaxAmount = tax,                    // налог 25%
+                TaxPaid = TaxPaid                   // статус оплаты
             });
+
+            // 👉 после формирования отчёта обнуляем доходы/расходы месяца
+            TotalIncome = 0;
+            TotalExpenses = 0;
         }
+
 
         // 👉 Переход на следующий день
         public void NextDay()

@@ -77,12 +77,14 @@
     <Compile Include="ReportsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="SaveManager.cs" />
     <Compile Include="TaxControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TaxControl.Designer.cs">
       <DependentUpon>TaxControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="UiUpdater.cs" />
     <Compile Include="WarehouseItem.cs" />
     <Compile Include="Workers.cs" />
     <EmbeddedResource Include="Form1.resx">

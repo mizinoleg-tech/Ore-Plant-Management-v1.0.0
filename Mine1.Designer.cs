@@ -18,6 +18,8 @@ namespace Miner
         private Button btnSellOre;
         private Label lblBalance;
         private Label lblDate;
+     
+        
         
 
        
@@ -37,6 +39,8 @@ namespace Miner
             this.btnSellOre = new System.Windows.Forms.Button();
             this.BtnNextDay = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
+            this.btnNewGame = new System.Windows.Forms.Button();
+            this.btnLoadProgress = new System.Windows.Forms.Button();
             this.btnSaveProgress = new System.Windows.Forms.Button();
             this.lblDate = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -66,6 +70,8 @@ namespace Miner
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.Silver;
+            this.splitContainer1.Panel2.Controls.Add(this.btnNewGame);
+            this.splitContainer1.Panel2.Controls.Add(this.btnLoadProgress);
             this.splitContainer1.Panel2.Controls.Add(this.btnSaveProgress);
             this.splitContainer1.Panel2.Controls.Add(this.lblDate);
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
@@ -117,15 +123,37 @@ namespace Miner
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeView1_AfterSelect);
             // 
+            // btnNewGame
+            // 
+            this.btnNewGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnNewGame.Location = new System.Drawing.Point(267, 477);
+            this.btnNewGame.Name = "btnNewGame";
+            this.btnNewGame.Size = new System.Drawing.Size(161, 30);
+            this.btnNewGame.TabIndex = 4;
+            this.btnNewGame.Text = "Новая Игра";
+            this.btnNewGame.UseVisualStyleBackColor = true;
+            this.btnNewGame.Click += new System.EventHandler(this.btnNewGame_Click);
+            // 
+            // btnLoadProgress
+            // 
+            this.btnLoadProgress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnLoadProgress.Location = new System.Drawing.Point(218, 513);
+            this.btnLoadProgress.Name = "btnLoadProgress";
+            this.btnLoadProgress.Size = new System.Drawing.Size(125, 23);
+            this.btnLoadProgress.TabIndex = 3;
+            this.btnLoadProgress.Text = "Загрузить";
+            this.btnLoadProgress.UseVisualStyleBackColor = true;
+            this.btnLoadProgress.Click += new System.EventHandler(this.btnLoadProgress_Click_1);
+            // 
             // btnSaveProgress
             // 
             this.btnSaveProgress.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnSaveProgress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnSaveProgress.Location = new System.Drawing.Point(306, 497);
+            this.btnSaveProgress.Location = new System.Drawing.Point(350, 513);
             this.btnSaveProgress.Name = "btnSaveProgress";
-            this.btnSaveProgress.Size = new System.Drawing.Size(171, 23);
+            this.btnSaveProgress.Size = new System.Drawing.Size(127, 23);
             this.btnSaveProgress.TabIndex = 2;
-            this.btnSaveProgress.Text = "button1";
+            this.btnSaveProgress.Text = "Сохранить";
             this.btnSaveProgress.UseVisualStyleBackColor = true;
             this.btnSaveProgress.Click += new System.EventHandler(this.btnSaveProgress_Click);
             // 
@@ -184,6 +212,7 @@ namespace Miner
             this.lblBalance.Size = new System.Drawing.Size(134, 25);
             this.lblBalance.TabIndex = 0;
             this.lblBalance.Text = "Баланс: 0 грн";
+            this.lblBalance.Click += new System.EventHandler(this.lblBalance_Click_2);
             // 
             // Mine1
             // 
@@ -210,5 +239,7 @@ namespace Miner
         #endregion
 
         private Button btnSaveProgress;
+        private Button btnLoadProgress;
+        private Button btnNewGame;
     }
 }
