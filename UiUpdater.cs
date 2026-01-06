@@ -29,32 +29,43 @@ namespace Miner
 
         public void Refresh(GameState gameState)
         {
-            _lblBalance.Text = $"Баланс: {gameState.Balance:N0} грн";
+            if (_lblBalance != null)
+                _lblBalance.Text = $"Баланс: {gameState.Balance:N0} грн";
 
-            if (gameState.Workers != null && gameState.Workers.Count >= 2)
+            if (_lblEmployees != null)
             {
-                int miners = gameState.Workers[0]?.Count ?? 0;
-                int admins = gameState.Workers[1]?.Count ?? 0;
-                _lblEmployees.Text = $"Горняки: {miners}, Администраторы: {admins}";
-            }
-            else
-            {
-                _lblEmployees.Text = "Сотрудники: нет данных";
-            }
+                if (gameState.Workers != null && gameState.Workers.Any())
+                {
+                    // ищем работников по имени
+                    int miners = gameState.Workers.FirstOrDefault(w => w.Name == "Горняк")?.Count ?? 0;
+                    int admins = gameState.Workers.FirstOrDefault(w => w.Name == "Администратор")?.Count ?? 0;
 
-
-            _lblMineLevel.Text = $"Уровень шахты: {gameState.MineLevel}";
-
-            _lstEquipment.Items.Clear();
-            if (gameState.Equipments != null)
-            {
-                foreach (var eq in gameState.Equipments)
-                    _lstEquipment.Items.Add($"{eq.Name} x{eq.Count}");
+                    _lblEmployees.Text = $"Горняки: {miners}, Администраторы: {admins}";
+                }
+                else
+                {
+                    _lblEmployees.Text = "Сотрудники: нет данных";
+                }
             }
 
-            _warehouseControl?.UpdateData();
+            if (_lblMineLevel != null)
+                _lblMineLevel.Text = $"Уровень шахты: {gameState.MineLevel}";
+
+            if (_lstEquipment != null)
+            {
+                _lstEquipment.Items.Clear();
+                if (gameState.Equipments != null)
+                {
+                    foreach (var eq in gameState.Equipments)
+                        _lstEquipment.Items.Add($"{eq.Name} x{eq.Count}");
+                }
+            }
+
+            _warehouseControl?.UpdateData(
+            _warehouseControl?.GetItem());
             _taxControl?.UpdateData();
         }
+
 
 
     }

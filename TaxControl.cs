@@ -20,7 +20,10 @@ namespace Miner
             _gameState = gameState;
             InitializeComponent();
         }
-
+        public void OnDayChanged()
+        {
+            UpdateData();
+        }
         // Публичный метод для UiUpdater
         public void UpdateData()
         {

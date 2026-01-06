@@ -7,24 +7,34 @@ using System.Drawing;
 
 namespace Miner
 {
-    namespace Miner
+    public class Workers
     {
-        public class Workers
-        {
-            public string Name { get; set; }              // Должность
-            public double ProductionPerDay { get; set; }  // Производство (тонн/день)
-            public double SalaryPerDay { get; set; }      // Зарплата (грн/день)
-            public double BonusPercent { get; set; }      // % бонуса к производству (для админа)
-            public int Count { get; set; }                // Количество сотрудников
+        public string Name { get; set; }              // должность
+        public int Count { get; set; }                // количество сотрудников
+        public double ProductionPerDay { get; set; }  // производство в день (тонн руды)
+        public double SalaryPerDay { get; set; }      // зарплата в день
+        public double BonusPercent { get; set; }      // бонус к производству (для администраторов)
 
-            public Workers(string name, double production, double salary, double bonusPercent = 0)
-            {
-                Name = name;
-                ProductionPerDay = production;
-                SalaryPerDay = salary;
-                BonusPercent = bonusPercent;
-                Count = 0;
-            }
+        // Конструктор для обычных работников
+        public Workers(string name, double productionPerDay, double salaryPerDay)
+        {
+            Name = name;
+            ProductionPerDay = productionPerDay;
+            SalaryPerDay = salaryPerDay;
+            BonusPercent = 0;
+            Count = 0;
+        }
+
+        // Конструктор для работников с бонусом (например, администратор)
+        public Workers(string name, double productionPerDay, double salaryPerDay, double bonusPercent)
+        {
+            Name = name;
+            ProductionPerDay = productionPerDay;
+            SalaryPerDay = salaryPerDay;
+            BonusPercent = bonusPercent;
+            Count = 0;
         }
     }
 }
+
+

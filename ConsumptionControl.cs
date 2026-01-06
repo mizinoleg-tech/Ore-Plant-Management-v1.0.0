@@ -19,8 +19,12 @@
                 InitUI();
                 UpdateData();
             }
+        public void OnDayChanged()
+        {
+            UpdateData();
+        }
 
-            private void InitUI()
+        private void InitUI()
             {
                 this.Dock = DockStyle.Fill;
                 this.BackColor = Color.FromArgb(40, 40, 45);

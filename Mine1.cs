@@ -1,6 +1,4 @@
-﻿using Mine;
-using Miner;
-using Miner.Miner;
+﻿
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
+using Miner;
 
 
 namespace Miner
@@ -73,7 +72,7 @@ namespace Miner
             // Обновляем контролы (без пересоздания!)
             employeesControl.UpdateData(gameState.Workers);
             equipmentControl.UpdateData(gameState.Equipments);
-            warehouseControl.UpdateData();
+            warehouseControl.UpdateData(            warehouseControl.GetItem());
             consumptionControl.UpdateData();
             taxControl?.UpdateData();
 
@@ -151,17 +150,22 @@ namespace Miner
             // обновляем баланс
             UpdateBalanceLabel();
 
-            // очищаем и обновляем все контролы
+            // пересоздаём контролы с новым gameState
             employeesControl = new EmployeesControl(gameState.Workers);
             equipmentControl = new EquipmentControl(gameState.Equipments);
-            warehouseControl = new WarehouseControl(gameState.RawOre);
+            warehouseControl = new WarehouseControl(gameState);   // ✅ передаём весь GameState
             consumptionControl = new ConsumptionControl(gameState);
             taxControl = new TaxControl(gameState);
 
+            // подписываем события заново
+            gameState.DayChanged += employeesControl.OnDayChanged;
+            gameState.DayChanged += equipmentControl.OnDayChanged;
+            gameState.DayChanged += warehouseControl.OnDayChanged;
+            gameState.DayChanged += consumptionControl.OnDayChanged;
+            gameState.DayChanged += taxControl.OnDayChanged;
 
             // безопасный вызов taxControl
-            if (taxControl != null)
-                taxControl.UpdateData();
+            taxControl?.UpdateData();
 
             // безопасный вызов UiUpdater
             if (lblBalance != null && lblEmployees != null && lblMineLevel != null && lstEquipment != null)
@@ -174,6 +178,7 @@ namespace Miner
             MessageBox.Show("Начата новая игра!", "Новая игра",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
 
         public void UpdateBalanceLabel()
         {
@@ -244,7 +249,8 @@ namespace Miner
             if (consumptionControl != null)
                 consumptionControl.UpdateData();
             // 👉 если открыт склад — обновляем его
-            warehouseControl?.UpdateData();
+            warehouseControl?.UpdateData(            // 👉 если открыт склад — обновляем его
+            warehouseControl?.GetItem());
         }
 
 
@@ -277,7 +283,9 @@ namespace Miner
             UpdateBalanceLabel();
 
             // обновляем склад-контрол
-            warehouseControl?.UpdateData();
+            warehouseControl?.UpdateData(
+            // обновляем склад-контрол
+            warehouseControl?.GetItem());
 
             // 👉 обновляем налоговый контрол
             taxControl?.UpdateTaxInfo();
@@ -317,7 +325,7 @@ namespace Miner
 
                     warehouseControl.Dock = DockStyle.Fill;
                     panel1.Controls.Add(warehouseControl);
-                    warehouseControl.UpdateData(); // обновляем данные при открытии
+                    warehouseControl.UpdateData(                    warehouseControl.GetItem()); // обновляем данные при открытии
                     break;
 
 
@@ -475,23 +483,17 @@ namespace Miner
             if (loadedState != null)
             {
                 gameState = loadedState;
-
-                // обновляем дату
                 gameDate = DateTime.Now;
                 lblDate.Text = gameDate.ToString("dd.MM.yyyy");
-
-                // обновляем баланс
                 UpdateBalanceLabel();
 
-                // 🔒 вот здесь вставляем обновление контролов
-                employeesControl.UpdateData(gameState.Workers);
-                equipmentControl.UpdateData(gameState.Equipments);
-                warehouseControl.UpdateData();
-                consumptionControl.UpdateData();
+                employeesControl?.UpdateData(gameState.Workers);
+                equipmentControl?.UpdateData(gameState.Equipments);
+                warehouseControl?.UpdateData(                warehouseControl?.GetItem());
+                consumptionControl?.UpdateData();
                 taxControl?.UpdateData();
 
-                // обновляем интерфейс через UiUpdater
-                uiUpdater.Refresh(gameState);
+                uiUpdater?.Refresh(gameState);
 
                 MessageBox.Show("Игра успешно загружена!", "Загрузка",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -621,7 +623,7 @@ namespace Miner
 
 
 
-        private void OnDayChanged() => UpdateMineInfo();
+       public  void OnDayChanged() => UpdateMineInfo();
 
         protected override void Dispose(bool disposing)
         {
@@ -646,6 +648,15 @@ namespace Miner
             InitUI();
             LoadData();
 
+        }
+        public void OnDayChanged()
+        {
+            UpdateData();
+        }
+
+        public void UpdateData()
+        {
+            LoadData();
         }
         // 🔒 Метод для обновления данных после загрузки сохранения
         public void UpdateData(List<Workers> newWorkers)
@@ -835,6 +846,12 @@ namespace Miner
         InitUI();
         LoadData();
         }
+    // обработчик события DayChanged
+    public void OnDayChanged()
+    {
+        LoadData();
+    }
+
     // 🔒 Метод для обновления данных после загрузки сохранения
     public void UpdateData(List<Equipment> newEquipments)
     {
@@ -974,26 +991,25 @@ namespace Miner
             }
         }
 
-        private void BtnRemove_Click(object sender, EventArgs e)
+    private void BtnRemove_Click(object sender, EventArgs e)
+    {
+        if (dgv.SelectedRows.Count > 0)
         {
-            if (dgv.SelectedRows.Count > 0)
+            int index = dgv.SelectedRows[0].Index;
+            if (equipments[index].Count > 0)
             {
-                int index = dgv.SelectedRows[0].Index;
-                if (equipments[index].Count > 0)
-                {
-                    // уменьшаем количество
-                    equipments[index].Count--;
-                    dgv.Rows[index].Cells["Count"].Value = equipments[index].Count;
+                // уменьшаем количество
+                equipments[index].Count--;
+                dgv.Rows[index].Cells["Count"].Value = equipments[index].Count;
 
-                    // возвращаем часть стоимости (например, 70%)
-                    double refund = equipments[index].Price * 0.7;
-                    ((Mine1)FindForm()).gameState.AddIncome(refund); // добавляем деньги на баланс
-                    ((Mine1)FindForm()).UpdateBalanceLabel();
+                // возвращаем часть стоимости (например, 70%)
+                double refund = equipments[index].Price * 0.7;
+                ((Mine1)FindForm()).gameState.AddIncome(refund); // добавляем деньги на баланс
+                ((Mine1)FindForm()).UpdateBalanceLabel();
 
-                    UpdateSummary();
-                }
             }
         }
+    }
 
 
         private void UpdateSummary()
@@ -1016,24 +1032,25 @@ namespace Miner
         private WarehouseItem item;   // один объект склада
         private GameState gameState;  // ссылка на состояние игры
 
-    public WarehouseItem RawOre { get; }
+    public WarehouseItem RawOre { get; private set; }
 
     // Конструктор: только GameState
-    public WarehouseControl(GameState state)
-        {
-            gameState = state ?? throw new ArgumentNullException(nameof(state));
-            item = new WarehouseItem("Сырая руда", GetOreQuantityFromState(state), 0.0);
-            InitUI();
-            LoadData();
-            gameState.DayChanged += OnDayChanged;
-        }
+  public WarehouseControl(GameState state)
+{
+    gameState = state ?? throw new ArgumentNullException(nameof(state));
+    item = state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0); // ✅ присваиваем item
+    InitUI();
+    LoadData();
+    gameState.DayChanged += OnDayChanged;
+}
+
 
         // Конструктор: GameState + WarehouseItem
         public WarehouseControl(GameState state, WarehouseItem rawOre)
         {
             gameState = state ?? throw new ArgumentNullException(nameof(state));
-            item = rawOre ?? new WarehouseItem("Сырая руда", GetOreQuantityFromState(state), 0.0);
-            InitUI();
+        RawOre = rawOre ?? state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0);
+          InitUI();
             LoadData();
             gameState.DayChanged += OnDayChanged;
         }
@@ -1041,7 +1058,7 @@ namespace Miner
         // Перегрузка с обратным порядком аргументов
         public WarehouseControl(WarehouseItem rawOre, GameState state)
             : this(state, rawOre) { }
-
+  
     public WarehouseControl(WarehouseItem rawOre)
     {
         RawOre = rawOre;
@@ -1049,8 +1066,8 @@ namespace Miner
 
     private double GetOreQuantityFromState(GameState state)
         {
-            return state.RawOre.Count; // если нужно — замени на формулу перевода в тонны
-        }
+        return state.RawOre.Quantity; // заменил Count на Quantity
+       }
 
         private void InitUI()
         {
@@ -1106,33 +1123,46 @@ namespace Miner
             this.Controls.Add(layout);
         }
 
-        private void LoadData()
+    private void LoadData()
+    {
+        if (item == null)
         {
-            dgv.Rows.Clear();
-            dgv.Rows.Add(
-                item.Name,
-                $"{item.Quantity:F2}",        // количество
-                $"{item.PricePerTon:F2} грн", // цена
-                $"{item.TotalValue():F2} грн" // общая стоимость
-            );
-
-            UpdateSummary();
+            lblSummary.Text = "Ошибка: склад не инициализирован.";
+            return;
         }
 
-        private void UpdateSummary()
+        dgv.Rows.Clear();
+        dgv.Rows.Add(
+            item.Name,
+            $"{item.Quantity:F2}",           // количество
+            $"{item.PricePerTon:F2} грн",    // цена
+            $"{item.TotalValue():F2} грн"    // общая стоимость
+        );
+
+        lblSummary.Text = $"На складе: {item.Quantity:F2} тонн | " +
+                          $"Цена: {item.PricePerTon:F2} грн/т | " +
+                          $"Общая стоимость: {item.TotalValue():F2} грн";
+    }
+
+
+    private void UpdateSummary()
         {
             lblSummary.Text = $"Всего: {item.Quantity:F2} тонн | Общая стоимость: {item.TotalValue():F2} грн";
         }
 
-        // 👉 метод обновления склада
-        public void UpdateData()
+    public WarehouseItem GetItem()
+    {
+        return item;
+    }
+
+    // 👉 метод обновления склада
+    public void UpdateData(WarehouseItem item)
         {
-            // если RawOre — один объект
-            item.Quantity = gameState.RawOre.Quantity;
+        item.Quantity = gameState.RawOre.Quantity;
             item.PricePerTon = gameState.RawOre.PricePerTon; // 👉 обновляем цену
 
             // если RawOre — список, то суммируем
-            // double totalOre = gameState.RawOre.Sum(r => r.Quantity);
+            //double totalOre = gameState.RawOre.Sum(r => r.Quantity);
             // item.Quantity = totalOre;
 
             LoadData();
@@ -1140,9 +1170,9 @@ namespace Miner
 
 
         // 👉 обработчик события смены дня
-        private void OnDayChanged()
+        public void OnDayChanged()
         {
-            UpdateData();
+            UpdateData(GetItem());
         }
 
         protected override void Dispose(bool disposing)

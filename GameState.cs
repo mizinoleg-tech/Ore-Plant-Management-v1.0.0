@@ -1,9 +1,10 @@
-﻿using Mine;
-using Miner.Miner;
+﻿using Miner;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+
 
 
 
@@ -36,28 +37,29 @@ namespace Miner
         public GameState()
         {
             Deposits = new List<MineDeposit>
-            {
-                new MineDeposit(900, 450000_000, 175_000_000), // 1 450 000 млн т (в тоннах)
-                new MineDeposit(1250, 670000_000, 250_000_000), // 250 млн грн
-                new MineDeposit(1315, 750000_000, 295_000_000),
-                // можешь добавить дальше уровни...
-            };
+    {
+        new MineDeposit(900, 450000_000, 175_000_000),
+        new MineDeposit(1250, 670000_000, 250_000_000),
+        new MineDeposit(1315, 750000_000, 295_000_000),
+    };
 
+            // 👉 всегда создаём двух базовых работников
             Workers = new List<Workers>
-            {
-                new Workers("Горняк", 0.48, 800),
-                new Workers("Администратор", 0, 700, 3.5)
-            };
+    {
+        new Workers("Горняк", 0.48, 800),
+        new Workers("Администратор", 0, 700, 3.5)
+    };
 
             Equipments = new List<Equipment>
-            {
-                new Equipment("Буровое оборудование", 7.5, 500, 350000),
-                new Equipment("Транспортное оборудование", 8.5, 900, 450000),
-                new Equipment("Скреперные лебедки", 5.3, 450, 175000)
-            };
+    {
+        new Equipment("Буровое оборудование", 7.5, 500, 350000),
+        new Equipment("Транспортное оборудование", 8.5, 900, 450000),
+        new Equipment("Скреперные лебедки", 5.3, 450, 175000)
+    };
 
-            RawOre = new WarehouseItem("Сырая руда", 0, 3400); // тут должна быть только цена 
+            RawOre = new WarehouseItem("Сырая руда", 0, 3400);
         }
+
 
 
 
@@ -112,14 +114,16 @@ namespace Miner
 
         public List<MineDeposit> Deposits { get; private set; }
         public int CurrentDepositIndex { get; private set; } = 0;
+
+       [JsonIgnore]
         public MineDeposit CurrentDeposit => Deposits[CurrentDepositIndex];
 
 
         // 👉 Нормы на 1 тонну руды
         public double WaterPerTon { get; set; } = 100;   // литров
         public double EnergyPerTon { get; set; } = 100;  // кВт·ч
-       
 
+       
         public event Action DayChanged;
 
 
