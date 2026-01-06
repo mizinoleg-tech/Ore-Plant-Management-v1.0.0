@@ -48,6 +48,41 @@ namespace Miner
             InitUI();
         }
 
+        private void LoadGame()
+        {
+            var saveManager = new SaveManager();
+            var loadedState = saveManager.Load();
+
+            if (loadedState == null)
+            {
+                MessageBox.Show("Сохранение не найдено.", "Загрузка игры",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Используем загруженное состояние
+            gameState = loadedState;
+
+            // Обновляем дату
+            gameDate = DateTime.Now;
+            lblDate.Text = gameDate.ToString("dd.MM.yyyy");
+
+            // Обновляем баланс
+            UpdateBalanceLabel();
+
+            // Обновляем контролы (без пересоздания!)
+            employeesControl.UpdateData(gameState.Workers);
+            equipmentControl.UpdateData(gameState.Equipments);
+            warehouseControl.UpdateData();
+            consumptionControl.UpdateData();
+            taxControl?.UpdateData();
+
+            // Обновляем интерфейс через UiUpdater
+            uiUpdater.Refresh(gameState);
+
+            MessageBox.Show("Игра успешно загружена!", "Загрузка игры",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
 
 
@@ -55,14 +90,14 @@ namespace Miner
         private ListBox lstEquipment;
         private void InitUI()
         {
-           
+
 
             // Метка сотрудников
             lblEmployees = new Label
             {
                 Location = new Point(20, 50),
                 AutoSize = true,
-                Text = $"Сотрудники: {gameState.Employees}"
+                Text = $"Сотрудники: {gameState.Workers}"
             };
             this.Controls.Add(lblEmployees);
 
@@ -119,16 +154,22 @@ namespace Miner
             // очищаем и обновляем все контролы
             employeesControl = new EmployeesControl(gameState.Workers);
             equipmentControl = new EquipmentControl(gameState.Equipments);
-            warehouseControl = new WarehouseControl(gameState);
+            warehouseControl = new WarehouseControl(gameState.RawOre);
             consumptionControl = new ConsumptionControl(gameState);
+            taxControl = new TaxControl(gameState);
 
-            // ❌ НЕ пересоздаём taxControl, он уже добавлен на форму
-            taxControl.UpdateData();
 
-            // обновляем интерфейс через UiUpdater
-            uiUpdater = new UiUpdater(lblBalance, lblEmployees, lblMineLevel,
-                                      lstEquipment, warehouseControl, taxControl);
-            uiUpdater.Refresh(gameState);
+            // безопасный вызов taxControl
+            if (taxControl != null)
+                taxControl.UpdateData();
+
+            // безопасный вызов UiUpdater
+            if (lblBalance != null && lblEmployees != null && lblMineLevel != null && lstEquipment != null)
+            {
+                uiUpdater = new UiUpdater(lblBalance, lblEmployees, lblMineLevel,
+                                          lstEquipment, warehouseControl, taxControl);
+                uiUpdater.Refresh(gameState);
+            }
 
             MessageBox.Show("Начата новая игра!", "Новая игра",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -271,10 +312,14 @@ namespace Miner
                     break;
 
                 case "Склад":
-                    warehouseControl = new WarehouseControl(gameState);
+                    if (warehouseControl == null)
+                        warehouseControl = new WarehouseControl(gameState);
+
                     warehouseControl.Dock = DockStyle.Fill;
                     panel1.Controls.Add(warehouseControl);
+                    warehouseControl.UpdateData(); // обновляем данные при открытии
                     break;
+
 
                 case "Потребление":
                     consumptionControl = new ConsumptionControl(gameState);
@@ -430,14 +475,35 @@ namespace Miner
             if (loadedState != null)
             {
                 gameState = loadedState;
-                uiUpdater.Refresh(gameState); // ← обновляем интерфейс через UiUpdater
-                MessageBox.Show("Игра успешно загружена!", "Загрузка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // обновляем дату
+                gameDate = DateTime.Now;
+                lblDate.Text = gameDate.ToString("dd.MM.yyyy");
+
+                // обновляем баланс
+                UpdateBalanceLabel();
+
+                // 🔒 вот здесь вставляем обновление контролов
+                employeesControl.UpdateData(gameState.Workers);
+                equipmentControl.UpdateData(gameState.Equipments);
+                warehouseControl.UpdateData();
+                consumptionControl.UpdateData();
+                taxControl?.UpdateData();
+
+                // обновляем интерфейс через UiUpdater
+                uiUpdater.Refresh(gameState);
+
+                MessageBox.Show("Игра успешно загружена!", "Загрузка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Сохранение не найдено.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Сохранение не найдено.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+
 
         private void btnNewGame_Click(object sender, EventArgs e)
         {
@@ -463,7 +529,7 @@ namespace Miner
         public MineManagementControl(GameState state)
         {
             gameState = state;
-            InitUI();      
+            InitUI();
             UpdateMineInfo();
         }
 
@@ -572,30 +638,41 @@ namespace Miner
         private Button btnHire;
         private Button btnFire;
 
-        private List<Workers> workers; // используем твой отдельный класс Workers
+        private List<Workers> workers;
 
         public EmployeesControl(List<Workers> sharedWorkers)
         {
-            workers = sharedWorkers;
+            workers = sharedWorkers ?? new List<Workers>();
             InitUI();
             LoadData();
-        }
 
+        }
+        // 🔒 Метод для обновления данных после загрузки сохранения
+        public void UpdateData(List<Workers> newWorkers)
+        {
+            workers = newWorkers ?? new List<Workers>();
+            LoadData();
+        }
         private void LoadData()
         {
+            dgv.Rows.Clear();
+
             foreach (var w in workers)
             {
-                dgv.Rows.Add(w.Name,
-                             w.Name == "Администратор" ? $"+{w.BonusPercent}% к производству" : $"{w.ProductionPerDay} т руды",
-                             $"{w.SalaryPerDay} грн",
-                             w.Count);
+                dgv.Rows.Add(
+                    w.Name,
+                    w.Name == "Администратор"
+                        ? $"+{w.BonusPercent}% к производству"
+                        : $"{w.ProductionPerDay} т руды",
+                    $"{w.SalaryPerDay} грн",
+                    w.Count
+                );
             }
+
             UpdateSummary();
         }
 
-        // 👉 Свойства для формы Mine1
-        public int MinersCount => workers[0].Count;
-        public int AdminsCount => workers[1].Count;
+
 
         private void InitUI()
         {
@@ -739,6 +816,7 @@ namespace Miner
                               $"Затраты: {salary} грн/день";
         }
     }
+}
 
 
 
@@ -753,12 +831,17 @@ namespace Miner
 
         public EquipmentControl(List<Equipment> sharedEquipments)
         {
-            equipments = sharedEquipments;
-            InitUI();
-            LoadData();
+        equipments = sharedEquipments ?? new List<Equipment>();
+        InitUI();
+        LoadData();
         }
-
-        private void InitUI()
+    // 🔒 Метод для обновления данных после загрузки сохранения
+    public void UpdateData(List<Equipment> newEquipments)
+    {
+        equipments = newEquipments ?? new List<Equipment>();
+        LoadData();
+    }
+    private void InitUI()
         {
             this.BackColor = Color.FromArgb(40, 40, 45);
             this.Padding = new Padding(10);
@@ -933,8 +1016,10 @@ namespace Miner
         private WarehouseItem item;   // один объект склада
         private GameState gameState;  // ссылка на состояние игры
 
-        // Конструктор: только GameState
-        public WarehouseControl(GameState state)
+    public WarehouseItem RawOre { get; }
+
+    // Конструктор: только GameState
+    public WarehouseControl(GameState state)
         {
             gameState = state ?? throw new ArgumentNullException(nameof(state));
             item = new WarehouseItem("Сырая руда", GetOreQuantityFromState(state), 0.0);
@@ -957,7 +1042,12 @@ namespace Miner
         public WarehouseControl(WarehouseItem rawOre, GameState state)
             : this(state, rawOre) { }
 
-        private double GetOreQuantityFromState(GameState state)
+    public WarehouseControl(WarehouseItem rawOre)
+    {
+        RawOre = rawOre;
+    }
+
+    private double GetOreQuantityFromState(GameState state)
         {
             return state.RawOre.Count; // если нужно — замени на формулу перевода в тонны
         }
@@ -1111,5 +1201,6 @@ namespace Miner
             this.Controls.Add(lbl);
         }
     }
-}
+
+
 

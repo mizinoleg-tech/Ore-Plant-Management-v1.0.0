@@ -1,6 +1,11 @@
-﻿using Miner;
+﻿using Mine;
+using Miner;
+using Miner.Miner;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
 
 public class SaveManager
 {
@@ -21,3 +26,5 @@ public class SaveManager
         return JsonConvert.DeserializeObject<GameState>(json);
     }
 }
+
+

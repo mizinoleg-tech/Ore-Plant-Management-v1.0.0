@@ -72,7 +72,7 @@ namespace Miner
 
                 // Пример восстановления
                 int balance = gameState.Balance;
-                int employees = gameState.Employees;
+                int employees = gameState.Workers;
                 int mineLevel = gameState.MineLevel;
                 // и т.д.
             }

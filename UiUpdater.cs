@@ -30,15 +30,32 @@ namespace Miner
         public void Refresh(GameState gameState)
         {
             _lblBalance.Text = $"Баланс: {gameState.Balance:N0} грн";
-            _lblEmployees.Text = $"Сотрудники: {gameState.Employees}";
+
+            if (gameState.Workers != null && gameState.Workers.Count >= 2)
+            {
+                int miners = gameState.Workers[0]?.Count ?? 0;
+                int admins = gameState.Workers[1]?.Count ?? 0;
+                _lblEmployees.Text = $"Горняки: {miners}, Администраторы: {admins}";
+            }
+            else
+            {
+                _lblEmployees.Text = "Сотрудники: нет данных";
+            }
+
+
             _lblMineLevel.Text = $"Уровень шахты: {gameState.MineLevel}";
 
             _lstEquipment.Items.Clear();
-            foreach (var eq in gameState.Equipment)
-                _lstEquipment.Items.Add(eq);
+            if (gameState.Equipments != null)
+            {
+                foreach (var eq in gameState.Equipments)
+                    _lstEquipment.Items.Add($"{eq.Name} x{eq.Count}");
+            }
 
-            _warehouseControl.UpdateData();
-            _taxControl.UpdateData();
+            _warehouseControl?.UpdateData();
+            _taxControl?.UpdateData();
         }
+
+
     }
 }

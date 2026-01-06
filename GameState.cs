@@ -11,9 +11,11 @@ namespace Miner
 {
     public class GameState
     {
+        
+      
+        public WarehouseItem RawOre { get; set; }
         public List<Workers> Workers { get; set; }
         public List<Equipment> Equipments { get; set; }
-        public WarehouseItem RawOre { get; set; }
        
         public double Balance { get; private set; } = 500000;
         public int MineLevel { get; set; }
@@ -29,6 +31,7 @@ namespace Miner
 
 
         public List<DayReport> Reports { get; private set; } = new List<DayReport>();
+
 
         public GameState()
         {
@@ -71,6 +74,7 @@ namespace Miner
             Balance -= LastDayExpenses;
         }
 
+
         public void CalculateMonthlyEquipmentExpenses()
         {
             LastDayExpenses = Equipments.Sum(eq => eq.MaintenanceCost * eq.Count);
@@ -85,6 +89,7 @@ namespace Miner
             TotalExpenses = salary + maintenance;
             Balance -= TotalExpenses;
         }
+
 
         public bool CanAfford(double cost) => Balance >= cost;
 
@@ -113,8 +118,7 @@ namespace Miner
         // 👉 Нормы на 1 тонну руды
         public double WaterPerTon { get; set; } = 100;   // литров
         public double EnergyPerTon { get; set; } = 100;  // кВт·ч
-        public object Employees { get; internal set; }
-        public IEnumerable<object> Equipment { get; internal set; }
+       
 
         public event Action DayChanged;
 
