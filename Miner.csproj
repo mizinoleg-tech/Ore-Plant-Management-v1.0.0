@@ -88,6 +88,9 @@
       <DependentUpon>TaxControl.cs</DependentUpon>
     </Compile>
     <Compile Include="UiUpdater.cs" />
+    <Compile Include="WarehouseControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="WarehouseItem.cs" />
     <Compile Include="Workers.cs" />
     <EmbeddedResource Include="EmployesControl.resx">

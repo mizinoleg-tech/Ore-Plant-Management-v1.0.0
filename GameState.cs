@@ -31,6 +31,8 @@ namespace Miner
         public int MaxMiners { get; set; } = 50;   // лимит горняков
         public int MaxAdmins { get; set; } = 20;   // лимит администраторов
 
+        public int WarehouseCapacity { get; set; } = 5000;   // текущий лимит
+        public int MaxWarehouseCapacity { get; set; } = 5000; // базовый максимум
 
 
         public List<DayReport> Reports { get; private set; } = new List<DayReport>();
@@ -101,6 +103,17 @@ namespace Miner
         {
             if (CanAfford(cost))
                 Balance -= cost;
+        }
+        public bool BuildWarehouse()
+        {
+            const double cost = 650000;
+            if (Balance >= cost)
+            {
+                Balance -= cost;
+                WarehouseCapacity += 5000; // увеличиваем лимит на +5000
+                return true;
+            }
+            return false;
         }
 
         // ... твои текущие поля
