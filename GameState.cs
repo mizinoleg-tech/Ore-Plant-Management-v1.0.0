@@ -28,6 +28,8 @@ namespace Miner
         public bool TaxPaid { get; set; }          // Оплачен ли налог за текущий месяц
         public int CurrentMonthProfit { get; set; } // Прибыль за месяц (считается отдельно)
 
+        public int MaxMiners { get; set; } = 50;   // лимит горняков
+        public int MaxAdmins { get; set; } = 20;   // лимит администраторов
 
 
 
@@ -164,6 +166,19 @@ namespace Miner
 
             Balance -= nextDeposit.UpgradeCost;
             CurrentDepositIndex++;
+        }
+        public bool BuildBattery()
+        {
+            const double cost = 450000;
+            if (Balance >= cost)
+            {
+                Balance -= cost;
+                // например, увеличить лимиты сотрудников
+                MaxMiners += 50;
+                MaxAdmins += 20;
+                return true;
+            }
+            return false;
         }
 
 

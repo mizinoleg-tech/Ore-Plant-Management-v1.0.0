@@ -72,7 +72,7 @@ namespace Miner
             // Обновляем контролы (без пересоздания!)
             employeesControl.UpdateData(gameState.Workers);
             equipmentControl.UpdateData(gameState.Equipments);
-            warehouseControl.UpdateData(            warehouseControl.GetItem());
+            warehouseControl.UpdateData(warehouseControl.GetItem());
             consumptionControl.UpdateData();
             taxControl?.UpdateData();
 
@@ -325,7 +325,7 @@ namespace Miner
 
                     warehouseControl.Dock = DockStyle.Fill;
                     panel1.Controls.Add(warehouseControl);
-                    warehouseControl.UpdateData(                    warehouseControl.GetItem()); // обновляем данные при открытии
+                    warehouseControl.UpdateData(warehouseControl.GetItem()); // обновляем данные при открытии
                     break;
 
 
@@ -489,7 +489,7 @@ namespace Miner
 
                 employeesControl?.UpdateData(gameState.Workers);
                 equipmentControl?.UpdateData(gameState.Equipments);
-                warehouseControl?.UpdateData(                warehouseControl?.GetItem());
+                warehouseControl?.UpdateData(warehouseControl?.GetItem());
                 consumptionControl?.UpdateData();
                 taxControl?.UpdateData();
 
@@ -623,7 +623,7 @@ namespace Miner
 
 
 
-       public  void OnDayChanged() => UpdateMineInfo();
+        public void OnDayChanged() => UpdateMineInfo();
 
         protected override void Dispose(bool disposing)
         {
@@ -632,202 +632,6 @@ namespace Miner
             base.Dispose(disposing);
         }
     }
-
-    public class EmployeesControl : UserControl
-    {
-        private DataGridView dgv;
-        private Label lblSummary;
-        private Button btnHire;
-        private Button btnFire;
-
-        private List<Workers> workers;
-
-        public EmployeesControl(List<Workers> sharedWorkers)
-        {
-            workers = sharedWorkers ?? new List<Workers>();
-            InitUI();
-            LoadData();
-
-        }
-        public void OnDayChanged()
-        {
-            UpdateData();
-        }
-
-        public void UpdateData()
-        {
-            LoadData();
-        }
-        // 🔒 Метод для обновления данных после загрузки сохранения
-        public void UpdateData(List<Workers> newWorkers)
-        {
-            workers = newWorkers ?? new List<Workers>();
-            LoadData();
-        }
-        private void LoadData()
-        {
-            dgv.Rows.Clear();
-
-            foreach (var w in workers)
-            {
-                dgv.Rows.Add(
-                    w.Name,
-                    w.Name == "Администратор"
-                        ? $"+{w.BonusPercent}% к производству"
-                        : $"{w.ProductionPerDay} т руды",
-                    $"{w.SalaryPerDay} грн",
-                    w.Count
-                );
-            }
-
-            UpdateSummary();
-        }
-
-
-
-        private void InitUI()
-        {
-            this.BackColor = Color.FromArgb(40, 40, 45);
-            this.Padding = new Padding(10);
-
-            var layout = new TableLayoutPanel();
-            layout.Dock = DockStyle.Fill;
-            layout.RowCount = 3;
-            layout.ColumnCount = 1;
-            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
-            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
-            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
-
-            // === Таблица сотрудников ===
-            dgv = new DataGridView();
-            dgv.Dock = DockStyle.Fill;
-            dgv.AllowUserToAddRows = false;
-            dgv.RowHeadersVisible = false;
-            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            dgv.Columns.Add("Name", "Должность");
-            dgv.Columns.Add("Production", "Производство/день");
-            dgv.Columns.Add("Salary", "Зарплата/день");
-            dgv.Columns.Add("Count", "Количество");
-
-            // Стили таблицы
-            dgv.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgv.DefaultCellStyle.BackColor = Color.FromArgb(60, 60, 65);
-            dgv.DefaultCellStyle.ForeColor = Color.White;
-            dgv.DefaultCellStyle.SelectionBackColor = Color.DarkSlateBlue;
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30, 30, 35);
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dgv.EnableHeadersVisualStyles = false;
-
-            // === Панель кнопок ===
-            var buttonPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.LeftToRight,
-                Padding = new Padding(10),
-                BackColor = Color.FromArgb(50, 50, 55)
-            };
-
-            btnHire = new Button
-            {
-                Text = "Нанять",
-                Width = 120,
-                Height = 40,
-                BackColor = Color.ForestGreen,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
-            };
-            btnHire.FlatAppearance.BorderSize = 0;
-            btnHire.Click += BtnHire_Click;
-
-            btnFire = new Button
-            {
-                Text = "Уволить",
-                Width = 120,
-                Height = 40,
-                BackColor = Color.DarkRed,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
-            };
-            btnFire.FlatAppearance.BorderSize = 0;
-            btnFire.Click += BtnFire_Click;
-
-            buttonPanel.Controls.Add(btnHire);
-            buttonPanel.Controls.Add(btnFire);
-
-            // === Сводка ===
-            lblSummary = new Label
-            {
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(50, 50, 55)
-            };
-
-            layout.Controls.Add(dgv, 0, 0);
-            layout.Controls.Add(buttonPanel, 0, 1);
-            layout.Controls.Add(lblSummary, 0, 2);
-
-            this.Controls.Add(layout);
-        }
-
-        private void BtnHire_Click(object sender, EventArgs e)
-        {
-            if (dgv.SelectedRows.Count > 0)
-            {
-                int index = dgv.SelectedRows[0].Index;
-                double cost = workers[index].SalaryPerDay;
-
-                // Проверка баланса
-                if (((Mine1)FindForm()).gameState.CanAfford(cost))
-                {
-                    ((Mine1)FindForm()).UpdateBalanceLabel();
-                    workers[index].Count++;
-                    dgv.Rows[index].Cells["Count"].Value = workers[index].Count;
-                    UpdateSummary();
-                }
-                else
-                {
-                    MessageBox.Show("Недостаточно средств для найма!");
-                }
-            }
-        }
-
-        private void BtnFire_Click(object sender, EventArgs e)
-        {
-            if (dgv.SelectedRows.Count > 0)
-            {
-                int index = dgv.SelectedRows[0].Index;
-                if (workers[index].Count > 0)
-                {
-                    workers[index].Count--;
-                    dgv.Rows[index].Cells["Count"].Value = workers[index].Count;
-                    UpdateSummary();
-                }
-            }
-        }
-
-        private void UpdateSummary()
-        {
-            int miners = workers[0].Count;
-            int admins = workers[1].Count;
-
-            double baseProduction = miners * workers[0].ProductionPerDay;
-            double productionWithAdmins = baseProduction * (1 + admins * (workers[1].BonusPercent / 100));
-
-            double salary = miners * workers[0].SalaryPerDay + admins * workers[1].SalaryPerDay;
-
-            lblSummary.Text = $"Итого: {miners} горняков, {admins} администраторов | " +
-                              $"Производство: {productionWithAdmins:F2} т/день | " +
-                              $"Затраты: {salary} грн/день";
-        }
-    }
-}
 
 
 
@@ -842,23 +646,23 @@ namespace Miner
 
         public EquipmentControl(List<Equipment> sharedEquipments)
         {
-        equipments = sharedEquipments ?? new List<Equipment>();
-        InitUI();
-        LoadData();
+            equipments = sharedEquipments ?? new List<Equipment>();
+            InitUI();
+            LoadData();
         }
-    // обработчик события DayChanged
-    public void OnDayChanged()
-    {
-        LoadData();
-    }
+        // обработчик события DayChanged
+        public void OnDayChanged()
+        {
+            LoadData();
+        }
 
-    // 🔒 Метод для обновления данных после загрузки сохранения
-    public void UpdateData(List<Equipment> newEquipments)
-    {
-        equipments = newEquipments ?? new List<Equipment>();
-        LoadData();
-    }
-    private void InitUI()
+        // 🔒 Метод для обновления данных после загрузки сохранения
+        public void UpdateData(List<Equipment> newEquipments)
+        {
+            equipments = newEquipments ?? new List<Equipment>();
+            LoadData();
+        }
+        private void InitUI()
         {
             this.BackColor = Color.FromArgb(40, 40, 45);
             this.Padding = new Padding(10);
@@ -991,25 +795,25 @@ namespace Miner
             }
         }
 
-    private void BtnRemove_Click(object sender, EventArgs e)
-    {
-        if (dgv.SelectedRows.Count > 0)
+        private void BtnRemove_Click(object sender, EventArgs e)
         {
-            int index = dgv.SelectedRows[0].Index;
-            if (equipments[index].Count > 0)
+            if (dgv.SelectedRows.Count > 0)
             {
-                // уменьшаем количество
-                equipments[index].Count--;
-                dgv.Rows[index].Cells["Count"].Value = equipments[index].Count;
+                int index = dgv.SelectedRows[0].Index;
+                if (equipments[index].Count > 0)
+                {
+                    // уменьшаем количество
+                    equipments[index].Count--;
+                    dgv.Rows[index].Cells["Count"].Value = equipments[index].Count;
 
-                // возвращаем часть стоимости (например, 70%)
-                double refund = equipments[index].Price * 0.7;
-                ((Mine1)FindForm()).gameState.AddIncome(refund); // добавляем деньги на баланс
-                ((Mine1)FindForm()).UpdateBalanceLabel();
+                    // возвращаем часть стоимости (например, 70%)
+                    double refund = equipments[index].Price * 0.7;
+                    ((Mine1)FindForm()).gameState.AddIncome(refund); // добавляем деньги на баланс
+                    ((Mine1)FindForm()).UpdateBalanceLabel();
 
+                }
             }
         }
-    }
 
 
         private void UpdateSummary()
@@ -1032,25 +836,25 @@ namespace Miner
         private WarehouseItem item;   // один объект склада
         private GameState gameState;  // ссылка на состояние игры
 
-    public WarehouseItem RawOre { get; private set; }
+        public WarehouseItem RawOre { get; private set; }
 
-    // Конструктор: только GameState
-  public WarehouseControl(GameState state)
-{
-    gameState = state ?? throw new ArgumentNullException(nameof(state));
-    item = state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0); // ✅ присваиваем item
-    InitUI();
-    LoadData();
-    gameState.DayChanged += OnDayChanged;
-}
+        // Конструктор: только GameState
+        public WarehouseControl(GameState state)
+        {
+            gameState = state ?? throw new ArgumentNullException(nameof(state));
+            item = state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0); // ✅ присваиваем item
+            InitUI();
+            LoadData();
+            gameState.DayChanged += OnDayChanged;
+        }
 
 
         // Конструктор: GameState + WarehouseItem
         public WarehouseControl(GameState state, WarehouseItem rawOre)
         {
             gameState = state ?? throw new ArgumentNullException(nameof(state));
-        RawOre = rawOre ?? state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0);
-          InitUI();
+            RawOre = rawOre ?? state.RawOre ?? new WarehouseItem("Сырая руда", 0, 0.0);
+            InitUI();
             LoadData();
             gameState.DayChanged += OnDayChanged;
         }
@@ -1058,16 +862,16 @@ namespace Miner
         // Перегрузка с обратным порядком аргументов
         public WarehouseControl(WarehouseItem rawOre, GameState state)
             : this(state, rawOre) { }
-  
-    public WarehouseControl(WarehouseItem rawOre)
-    {
-        RawOre = rawOre;
-    }
 
-    private double GetOreQuantityFromState(GameState state)
+        public WarehouseControl(WarehouseItem rawOre)
         {
-        return state.RawOre.Quantity; // заменил Count на Quantity
-       }
+            RawOre = rawOre;
+        }
+
+        private double GetOreQuantityFromState(GameState state)
+        {
+            return state.RawOre.Quantity; // заменил Count на Quantity
+        }
 
         private void InitUI()
         {
@@ -1123,42 +927,42 @@ namespace Miner
             this.Controls.Add(layout);
         }
 
-    private void LoadData()
-    {
-        if (item == null)
+        private void LoadData()
         {
-            lblSummary.Text = "Ошибка: склад не инициализирован.";
-            return;
+            if (item == null)
+            {
+                lblSummary.Text = "Ошибка: склад не инициализирован.";
+                return;
+            }
+
+            dgv.Rows.Clear();
+            dgv.Rows.Add(
+                item.Name,
+                $"{item.Quantity:F2}",           // количество
+                $"{item.PricePerTon:F2} грн",    // цена
+                $"{item.TotalValue():F2} грн"    // общая стоимость
+            );
+
+            lblSummary.Text = $"На складе: {item.Quantity:F2} тонн | " +
+                              $"Цена: {item.PricePerTon:F2} грн/т | " +
+                              $"Общая стоимость: {item.TotalValue():F2} грн";
         }
 
-        dgv.Rows.Clear();
-        dgv.Rows.Add(
-            item.Name,
-            $"{item.Quantity:F2}",           // количество
-            $"{item.PricePerTon:F2} грн",    // цена
-            $"{item.TotalValue():F2} грн"    // общая стоимость
-        );
 
-        lblSummary.Text = $"На складе: {item.Quantity:F2} тонн | " +
-                          $"Цена: {item.PricePerTon:F2} грн/т | " +
-                          $"Общая стоимость: {item.TotalValue():F2} грн";
-    }
-
-
-    private void UpdateSummary()
+        private void UpdateSummary()
         {
             lblSummary.Text = $"Всего: {item.Quantity:F2} тонн | Общая стоимость: {item.TotalValue():F2} грн";
         }
 
-    public WarehouseItem GetItem()
-    {
-        return item;
-    }
-
-    // 👉 метод обновления склада
-    public void UpdateData(WarehouseItem item)
+        public WarehouseItem GetItem()
         {
-        item.Quantity = gameState.RawOre.Quantity;
+            return item;
+        }
+
+        // 👉 метод обновления склада
+        public void UpdateData(WarehouseItem item)
+        {
+            item.Quantity = gameState.RawOre.Quantity;
             item.PricePerTon = gameState.RawOre.PricePerTon; // 👉 обновляем цену
 
             // если RawOre — список, то суммируем
@@ -1231,6 +1035,7 @@ namespace Miner
             this.Controls.Add(lbl);
         }
     }
+}
 
 
 

@@ -117,7 +117,7 @@ namespace Miner
             this.treeView1.BackColor = System.Drawing.Color.IndianRed;
             this.treeView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.treeView1.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
+            this.treeView1.Location = new System.Drawing.Point(-3, 17);
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(407, 454);
             this.treeView1.TabIndex = 0;
@@ -177,7 +177,7 @@ namespace Miner
             this.panel1.BackColor = System.Drawing.Color.White;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(489, 454);
+            this.panel1.Size = new System.Drawing.Size(489, 471);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
