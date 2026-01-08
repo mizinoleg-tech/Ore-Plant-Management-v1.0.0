@@ -18,7 +18,7 @@ namespace Miner
         public List<Workers> Workers { get; set; }
         public List<Equipment> Equipments { get; set; }
        
-        public double Balance { get; private set; } = 500000;
+        public double Balance { get; private set; } = 3000;
         public int MineLevel { get; set; }
         public double TotalIncome { get; private set; }
         public double TotalExpenses { get; private set; }
@@ -61,7 +61,7 @@ namespace Miner
         new Equipment("Скреперные лебедки", 5.3, 450, 175000)
     };
 
-            RawOre = new WarehouseItem("Сырая руда", 0, 3400);
+            RawOre = new WarehouseItem("Сырая руда", 0, 3200);
         }
 
 

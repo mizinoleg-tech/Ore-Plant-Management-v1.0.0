@@ -23,6 +23,11 @@ using System.Xml.Linq;
         Price = price;
         Count = 0;
     }
-}
+        public override string ToString()
+        {
+            return $"{Name} | Кол-во: {Count} | Цена: {Price.ToString("#,##0")} грн | Обслуживание: {MaintenanceCost:#,##0} грн/мес";
+        }
+
+    }
 }
 

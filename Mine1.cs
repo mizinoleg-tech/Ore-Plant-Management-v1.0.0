@@ -764,10 +764,11 @@ namespace Miner
             foreach (var eq in equipments)
             {
                 dgv.Rows.Add(eq.Name,
-                             $"{eq.BonusPercent} %",
-                             $"{eq.MaintenanceCost} грн",
-                             $"{eq.Price} грн",   // цена покупки
-                             eq.Count);
+               $"{eq.BonusPercent} %",
+               $"{eq.MaintenanceCost:#,##0} грн",
+               $"{eq.Price:#,##0} грн",   // цена покупки
+               eq.Count);
+
             }
             UpdateSummary();
         }
