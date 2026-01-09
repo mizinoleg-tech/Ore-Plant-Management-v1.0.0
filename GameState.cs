@@ -18,7 +18,7 @@ namespace Miner
         public List<Workers> Workers { get; set; }
         public List<Equipment> Equipments { get; set; }
        
-        public double Balance { get; private set; } = 3000;
+        public double Balance { get; private set; } = 300000;
         public int MineLevel { get; set; }
         public double TotalIncome { get; private set; }
         public double TotalExpenses { get; private set; }
@@ -148,37 +148,57 @@ namespace Miner
             var deposit = CurrentDeposit;
             if (deposit.RemainingOre <= 0)
             {
-                MessageBox.Show("Залежи на текущей глубине исчерпаны. Улучшите шахту для перехода глубже.");
+                MessageBox.Show("Залежи исчерпаны. Улучшите шахту.");
                 return;
             }
 
-            // сколько реально можно добыть из залежи
             double mined = Math.Min(tons, deposit.RemainingOre);
 
-            // проверяем свободное место на складе
-            double freeSpace = Warehouse.Capacity - Warehouse.Items.Sum(i => i.Quantity);
-
+            double freeSpace = Warehouse.FreeSpace;
             if (freeSpace <= 0)
             {
                 MessageBox.Show("Склад переполнен! Постройте дополнительные склады.");
                 return;
             }
 
-            // добываем только столько, сколько помещается
             double toStore = Math.Min(mined, freeSpace);
 
             deposit.RemainingOre -= toStore;
-            RawOre.Quantity += toStore;
+
+            // ✅ кладём руду через Warehouse
+            Warehouse.AddOre(toStore, RawOre.PricePerTon);
+
+            // ✅ синхронизируем RawOre с объектом из Warehouse
+            RawOre = Warehouse.Items.FirstOrDefault(i => i.Name == "Сырая руда");
 
             WaterConsumptionLiters += toStore * WaterPerTon;
             ElectricityConsumptionKwh += toStore * EnergyPerTon;
 
-            // если часть добычи не поместилась
             if (toStore < mined)
             {
                 MessageBox.Show($"Добыто {mined:N2} тонн, но на склад поместилось только {toStore:N2} тонн.");
             }
         }
+
+
+        public void SellOre()
+        {
+            var ore = Warehouse.Items.FirstOrDefault(i => i.Name == "Сырая руда");
+            if (ore == null || ore.Quantity <= 0)
+            {
+                MessageBox.Show("На складе нет руды.");
+                return;
+            }
+
+            double revenue = ore.TotalValue();
+            Balance += revenue;
+            CurrentMonthProfit += (int)revenue;
+
+            // ✅ очищаем склад через SetQuantity
+            ore.SetQuantity(0);
+            Warehouse.Items.Remove(ore); // можно удалить объект, если пустой
+        }
+
 
         public void UpgradeMine()
         {

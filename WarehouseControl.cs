@@ -50,7 +50,7 @@ public class WarehouseControl : UserControl
     {
         return state.RawOre.Quantity; // заменил Count на Quantity
     }
-
+    private ProgressBar progressBar;
     private void InitUI()
     {
         this.BackColor = Color.FromArgb(40, 40, 45);
@@ -122,7 +122,23 @@ public class WarehouseControl : UserControl
             Font = new Font("Segoe UI", 11F, FontStyle.Bold),
             ForeColor = Color.White,
             BackColor = Color.FromArgb(50, 50, 55)
+        };// === Прогресс‑бар заполненности склада ===
+        progressBar = new ProgressBar
+        {
+            Dock = DockStyle.Fill,
+            Height = 25,
+            Minimum = 0,
+            Maximum = gameState.Warehouse.Capacity,
+            Value = 0,
+            ForeColor = Color.Gold,
+            BackColor = Color.DarkGray
         };
+
+        // увеличиваем количество строк в layout
+        layout.RowCount = 4;
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // строка для прогресс‑бара
+        layout.Controls.Add(progressBar, 0, 3);
+
 
         // === Добавляем всё в макет ===
         layout.Controls.Add(dgv, 0, 0);
@@ -148,6 +164,18 @@ public class WarehouseControl : UserControl
             $"{item.PricePerTon:F2} грн",    // цена
             $"{item.TotalValue():F2} грн"    // общая стоимость
         );
+        // обновляем прогресс‑бар
+        progressBar.Maximum = gameState.Warehouse.Capacity;
+        progressBar.Value = (int)Math.Min(item.Quantity, gameState.Warehouse.Capacity);
+
+        // цветовая индикация
+        double fillPercent = (double)progressBar.Value / progressBar.Maximum;
+        if (fillPercent < 0.5)
+            progressBar.ForeColor = Color.Green;   // <50% — зелёный
+        else if (fillPercent < 0.8)
+            progressBar.ForeColor = Color.Goldenrod; // 50–80% — жёлтый
+        else
+            progressBar.ForeColor = Color.Red;     // >80% — красный
 
         lblSummary.Text = $"На складе: {item.Quantity:F2} тонн | " +
                           $"Цена: {item.PricePerTon:F2} грн/т | " +
@@ -168,15 +196,12 @@ public class WarehouseControl : UserControl
     // 👉 метод обновления склада
     public void UpdateData(WarehouseItem item)
     {
-        item.Quantity = gameState.RawOre.Quantity;
-        item.PricePerTon = gameState.RawOre.PricePerTon; // 👉 обновляем цену
-
-        // если RawOre — список, то суммируем
-        //double totalOre = gameState.RawOre.Sum(r => r.Quantity);
-        // item.Quantity = totalOre;
-
+        item.SetQuantity(gameState.RawOre.Quantity);   // ✅ вместо прямого присвоения
+        item.PricePerTon = gameState.RawOre.PricePerTon;
         LoadData();
     }
+
+
     private void BtnBuildWarehouse_Click(object sender, EventArgs e)
     {
         var game = ((Mine1)FindForm()).gameState;
@@ -186,6 +211,9 @@ public class WarehouseControl : UserControl
                 "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             ((Mine1)FindForm()).UpdateBalanceLabel();
             UpdateSummary(); // если есть сводка по складу
+            progressBar.Maximum = game.Warehouse.Capacity;
+            progressBar.Value = (int)Math.Min(item.Quantity, game.Warehouse.Capacity);
+
         }
         else
         {

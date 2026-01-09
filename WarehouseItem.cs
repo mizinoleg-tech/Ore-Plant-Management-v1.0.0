@@ -8,27 +8,32 @@ namespace Miner
 {
     public class WarehouseItem
     {
-        public string Name { get; set; }          // Название ресурса
-        public double Quantity { get; set; }      // Количество тонн
-        public double PricePerTon { get; set; }   // Цена за тонну (грн)
+        public string Name { get; set; }
+        public double Quantity { get; private set; } // приватный сеттер — ок
+        public double PricePerTon { get; set; }
         public double Count { get; internal set; }
+
+        public double Capacity { get; set; } = 5000.0;
 
         public WarehouseItem(string name, double quantity, double pricePerTon)
         {
             Name = name;
-            Quantity = quantity;
             PricePerTon = pricePerTon;
+            SetQuantity(quantity); // сразу нормализуем
         }
 
-        // Добавить руду в склад
-        public void Add(double tons) => Quantity += tons;
+        // Добавить руду с учётом лимита
+        public void Add(double tons)
+        {
+            SetQuantity(Quantity + tons);
+        }
 
-        // Общая стоимость запасов
+        // Установить количество с учётом лимита
+        public void SetQuantity(double value)
+        {
+            Quantity = Math.Min(Math.Max(value, 0.0), Capacity);
+        }
+
         public double TotalValue() => Quantity * PricePerTon;
     }
 }
-
-
-
-
-

@@ -270,26 +270,25 @@ namespace Miner
             // добавляем деньги на баланс
             gameState.AddIncome(revenue);
 
-            // 👉 фиксируем прибыль месяца (важно для налогов)
+            // фиксируем прибыль месяца (важно для налогов)
             gameState.CurrentMonthProfit += (int)revenue;
 
             // добавляем запись в отчёт
             gameState.AddReport(gameDate, 0, tonsToSell, revenue);
 
-            // очищаем склад (обнуляем количество руды)
-            gameState.RawOre.Quantity = 0;
+            // очищаем склад (через SetQuantity)
+            gameState.RawOre.SetQuantity(0);
 
             // обновляем баланс на форме
             UpdateBalanceLabel();
 
             // обновляем склад-контрол
-            warehouseControl?.UpdateData(
-            // обновляем склад-контрол
-            warehouseControl?.GetItem());
+            warehouseControl?.UpdateData(warehouseControl?.GetItem());
 
-            // 👉 обновляем налоговый контрол
+            // обновляем налоговый контрол
             taxControl?.UpdateTaxInfo();
         }
+
 
 
 
