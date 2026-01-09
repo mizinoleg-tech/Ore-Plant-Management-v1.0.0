@@ -143,7 +143,8 @@ namespace Miner
             this.btnLoadProgress.TabIndex = 3;
             this.btnLoadProgress.Text = "Загрузить";
             this.btnLoadProgress.UseVisualStyleBackColor = true;
-            this.btnLoadProgress.Click += new System.EventHandler(this.btnLoadProgress_Click_1);
+            this.btnLoadProgress.Click += new System.EventHandler(this.btnLoadProgress_Click);
+
             // 
             // btnSaveProgress
             // 

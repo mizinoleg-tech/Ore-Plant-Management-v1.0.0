@@ -444,18 +444,8 @@ namespace Miner
         private void btnSaveProgress_Click(object sender, EventArgs e)
         {
             saveManager.Save(gameState);
-            MessageBox.Show("Прогресс игры сохранён!", "Сохранение", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            saveManager.Save(gameState);
-            var loaded = saveManager.Load();
-
-        }
-
-        private void btnLoadProgress_Click(object sender, EventArgs e)
-        {
-            saveManager.Save(gameState);
-            var loaded = saveManager.Load();
-
-
+            MessageBox.Show("Прогресс игры сохранён!", "Сохранение",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -477,7 +467,7 @@ namespace Miner
 
         }
 
-        private void btnLoadProgress_Click_1(object sender, EventArgs e)
+        private void btnLoadProgress_Click(object sender, EventArgs e)
         {
             var loadedState = saveManager.Load();
             if (loadedState != null)
@@ -489,7 +479,7 @@ namespace Miner
 
                 employeesControl?.UpdateData(gameState.Workers);
                 equipmentControl?.UpdateData(gameState.Equipments);
-                warehouseControl?.UpdateData(warehouseControl?.GetItem());
+                warehouseControl?.UpdateData(gameState.RawOre);
                 consumptionControl?.UpdateData();
                 taxControl?.UpdateData();
 
@@ -504,6 +494,7 @@ namespace Miner
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
 
 
 

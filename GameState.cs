@@ -13,7 +13,7 @@ namespace Miner
     public class GameState
     {
         
-      
+      public Warehouse Warehouse { get; set; } = new Warehouse();
         public WarehouseItem RawOre { get; set; }
         public List<Workers> Workers { get; set; }
         public List<Equipment> Equipments { get; set; }
@@ -145,22 +145,41 @@ namespace Miner
         // 👉 Добыча руды
         public void MineOre(double tons)
         {
-
             var deposit = CurrentDeposit;
             if (deposit.RemainingOre <= 0)
             {
                 MessageBox.Show("Залежи на текущей глубине исчерпаны. Улучшите шахту для перехода глубже.");
                 return;
-
             }
+
+            // сколько реально можно добыть из залежи
             double mined = Math.Min(tons, deposit.RemainingOre);
-            deposit.RemainingOre -= mined;
-            RawOre.Quantity += mined;
-            WaterConsumptionLiters += mined * WaterPerTon;
-            ElectricityConsumptionKwh += mined * EnergyPerTon;
 
+            // проверяем свободное место на складе
+            double freeSpace = Warehouse.Capacity - Warehouse.Items.Sum(i => i.Quantity);
 
+            if (freeSpace <= 0)
+            {
+                MessageBox.Show("Склад переполнен! Постройте дополнительные склады.");
+                return;
+            }
+
+            // добываем только столько, сколько помещается
+            double toStore = Math.Min(mined, freeSpace);
+
+            deposit.RemainingOre -= toStore;
+            RawOre.Quantity += toStore;
+
+            WaterConsumptionLiters += toStore * WaterPerTon;
+            ElectricityConsumptionKwh += toStore * EnergyPerTon;
+
+            // если часть добычи не поместилась
+            if (toStore < mined)
+            {
+                MessageBox.Show($"Добыто {mined:N2} тонн, но на склад поместилось только {toStore:N2} тонн.");
+            }
         }
+
         public void UpgradeMine()
         {
             if (CurrentDepositIndex + 1 >= Deposits.Count)

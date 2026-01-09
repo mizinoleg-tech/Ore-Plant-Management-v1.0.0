@@ -209,5 +209,22 @@ public class WarehouseControl : UserControl
         }
         base.Dispose(disposing);
     }
+
+    private void InitializeComponent()
+    {
+            this.SuspendLayout();
+            // 
+            // WarehouseControl
+            // 
+            this.Name = "WarehouseControl";
+            this.Load += new System.EventHandler(this.WarehouseControl_Load);
+            this.ResumeLayout(false);
+
+    }
+
+    private void WarehouseControl_Load(object sender, EventArgs e)
+    {
+
+    }
 }
 
