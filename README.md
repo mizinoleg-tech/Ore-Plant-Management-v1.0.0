@@ -1,4 +1,5 @@
 # Miner
+https://jupiter63.itch.io/ore-plant-management-v100
 # Комплекс — Business Simulator / Ore Plant Management
 
 **Комплекс** — это бизнес-симулятор управления шахтой и переработкой ресурсов.  
